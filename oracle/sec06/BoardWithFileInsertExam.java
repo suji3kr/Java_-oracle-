@@ -22,13 +22,21 @@ public class BoardWithFileInsertExam {
                     "INSERT INTO boards (bno, btitle, bcontent, bwriter, bdate, bfilename, bfiledata) " +
                     "VALUES (SEQ_BNO.NEXTVAL, ?, ?, ?, SYSDATE, ?, ?)"; // SQL INSERT 문
 
-            // PreparedStatement 얻기 및 값 지정
+//            // PreparedStatement 얻기 및 값 지정
+//            PreparedStatement pstmt = conn.prepareStatement(sql, new String[]{"bno"}); // bno를 자동 생성키로 설정
+//            pstmt.setString(1, "눈 오는 날"); // btitle
+//            pstmt.setString(2, "함박눈이 내려요"); // bcontent
+//            pstmt.setString(3, "winter"); // bwriter
+//            pstmt.setString(4, "snow.jpg"); // bfilename
+//            pstmt.setBlob(5, BoardWithFileInsertExam.class.getResourceAsStream("snow.jpg")); // bfiledata
+
+
             PreparedStatement pstmt = conn.prepareStatement(sql, new String[]{"bno"}); // bno를 자동 생성키로 설정
-            pstmt.setString(1, "눈 오는 날"); // btitle
-            pstmt.setString(2, "함박눈이 내려요"); // bcontent
+            pstmt.setString(1, "크리스마스"); // btitle
+            pstmt.setString(2, "메리 크리스마스~"); // bcontent
             pstmt.setString(3, "winter"); // bwriter
-            pstmt.setString(4, "snow.jpg"); // bfilename
-            pstmt.setBlob(5, BoardWithFileInsertExam.class.getResourceAsStream("snow.jpg")); // bfiledata
+            pstmt.setString(4, "christmas.jpg"); // bfilename
+            pstmt.setBlob(5, BoardWithFileInsertExam.class.getResourceAsStream("christmas.jpg")); // bfiledata
 
             // SQL문 실행
             int rows = pstmt.executeUpdate(); // 데이터베이스에 SQL문 실행
