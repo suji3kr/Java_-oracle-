@@ -25,19 +25,43 @@ public class TransactionExam {
             //출금작업
             String sql1 = "UPDATE accounts SET balance= balance-? WHERE ano=?";
             PreparedStatement pstmt1 = conn. prepareStatement(sql1);
-            pstmt1.setInt();
+            pstmt1.setInt(1, 10000);
+            pstmt1.setString(2, "111-111-1111");
+            int rows1 = pstmt1.executeUpdate();
+            if(rows1 == 0) throw new Exception("출금되지 않았음");
+            pstmt1.close();
 
+            //입금작업
+            String sql2 = "UPDATE accounts SET balance= balance+? WHERE ano=?";
+            PreparedStatement pstmt2 = conn. prepareStatement(sql1);
+            pstmt2.setInt(1, 10000);
+            pstmt2.setString(2, "222-222-2222");  //입금계좌를 다르게 주면 42라인에서 예외발생
+            int rows2 = pstmt2.executeUpdate();
+            if(rows2 == 0) throw new Exception("입금되지 않았음");
+            pstmt2.close();
 
+            //수동커밋 -> 모두 성공 처리
+            conn.commit();
+            System.out.println("계좌 이체 성공");
 
+            //트랜젝션 종료 ------------------------------------------
 
-
-
-
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            try{
+                //수동 롤백 -> 모두 실패처리               //예외 처리 코드 롤백된다. 롤백이 되면 출금도 실패 처리, 출금 입금계좌 금액 변동안된다
+                conn.rollback();
+            } catch (SQLException e1) {}
+                System.out.println("계좌 이체 실패");
+                e.printStackTrace();
+            }finally {
+            if(conn != null){
+                try{
+                   //원래대로 자동커밋 기능 켜기
+                    conn.setAutoCommit(true);
+                    //연결 끊기
+                    conn.close();
+                }catch (SQLException e) {}
+            }
         }
     }
-
 }

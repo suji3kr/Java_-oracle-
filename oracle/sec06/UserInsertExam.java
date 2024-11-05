@@ -7,8 +7,8 @@ import java.sql.SQLException; // SQL 예외 처리 클래스 임포트
 
 public class UserInsertExam {
     public static void main(String[] args) {
-
         Connection conn = null; // 데이터베이스 연결을 위한 Connection 객체 초기화
+        PreparedStatement pstmt = null; // PreparedStatement 객체 초기화
         try {
             // JDBC 드라이버 등록
             Class.forName("oracle.jdbc.OracleDriver");
@@ -21,12 +21,10 @@ public class UserInsertExam {
             );
 
             // 매개변수화된 SQL 문 작성
-            String sql = "" +
-                    "INSERT INTO users(userid, username, userpassword, userage, useremail) " +
-                    "VALUES(?, ?, ?, ?, ?)"; // SQL 쿼리 문
+            String sql = "INSERT INTO users(userid, username, userpassword, userage, useremail) VALUES(?, ?, ?, ?, ?)"; // SQL 쿼리 문
 
             // PreparedStatement 얻기 및 값 지정
-            PreparedStatement pstmt = conn.prepareStatement(sql); // SQL 쿼리를 준비
+            pstmt = conn.prepareStatement(sql); // SQL 쿼리를 준비
             pstmt.setString(1, "summer"); // userid
             pstmt.setString(2, "한여름"); // username
             pstmt.setString(3, "12345"); // userpassword
@@ -37,27 +35,30 @@ public class UserInsertExam {
             int rows = pstmt.executeUpdate(); // SQL 쿼리 실행
             System.out.println("저장된 행 수: " + rows); // 저장된 행 수 출력
 
-            // PreparedStatement 닫기
-            pstmt.close(); // 자원 해제를 위해 PreparedStatement 닫기
-
         } catch (ClassNotFoundException e) {
             // JDBC 드라이버를 찾을 수 없는 경우 예외 처리
+            System.err.println("JDBC 드라이버를 찾을 수 없습니다.");
             e.printStackTrace();
 
         } catch (SQLException e) {
             // SQL 관련 예외 처리
+            System.err.println("SQL 오류: " + e.getMessage());
             e.printStackTrace();
 
         } finally {
-            // 연결 해제
-            if (conn != null) {
-                try {
+            // 자원 해제
+            try {
+                if (pstmt != null) {
+                    pstmt.close(); // PreparedStatement 닫기
+                }
+                if (conn != null) {
                     conn.close(); // 데이터베이스 연결 닫기
                     System.out.println("연결 끊기");
-                } catch (SQLException e) {
-                    // 연결 닫기 중 예외 처리
-                    e.printStackTrace();
                 }
+            } catch (SQLException e) {
+                // 연결 닫기 중 예외 처리
+                System.err.println("자원 해제 중 오류 발생: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
