@@ -1,0 +1,135 @@
+package ch20.oracle.sec12;
+
+import ch20.oracle.sec09.exam02.Board;
+import java.sql.*;
+import java.util.Scanner;
+
+public class BoardExample3 {
+    // 필드 선언
+    private Scanner scanner = new Scanner(System.in);  // 사용자 입력을 받을 Scanner 객체
+    private Connection conn;  // 데이터베이스 연결을 위한 Connection 객체
+
+    // 생성자: BoardExample3 객체가 생성될 때 실행됨
+    public BoardExample3() {
+        try {
+            // JDBC 드라이버 등록: Oracle JDBC 드라이버를 동적으로 로드
+            Class.forName("oracle.jdbc.OracleDriver");
+
+            // 데이터베이스에 연결: 연결 URL, 사용자명, 비밀번호를 사용하여 연결을 생성
+            conn = DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521/xe",  // 데이터베이스 URL (호스트: localhost, 포트: 1521, SID: xe)
+                    "java",  // 데이터베이스 사용자명
+                    "oracle"  // 데이터베이스 비밀번호
+            );
+        } catch (Exception e) {
+            e.printStackTrace();  // 예외가 발생하면 예외 정보 출력
+            exit();  // 예외 발생 시 프로그램 종료
+        }
+    }
+
+    // 게시물 목록을 출력하는 메소드
+    public void list() {
+        // 출력 포맷을 설정하여 타이틀 및 컬럼명을 출력
+        System.out.println();
+        System.out.println("[게시물 목록]");  // 게시물 목록 제목
+        System.out.println("--------------------------------------------");
+        // 컬럼명을 포맷에 맞춰 출력 (no, writer, date, title)
+        System.out.printf("%-6s%-12s%-16s%-40s\n", "no", "writer", "date", "title");
+        System.out.println("--------------------------------------------");
+
+        // boards 테이블에서 게시물 정보를 조회하는 SQL 쿼리
+        try {
+            // SQL 쿼리문: 게시물 번호(bno), 제목(btitle), 내용(bcontent), 작성자(bwriter), 작성일(bdate) 조회
+            String sql = "" +
+                    "SELECT bno, btitle, bcontent, bwriter, bdate " +
+                    "FROM boards " +  // boards 테이블에서 데이터를 조회
+                    "ORDER BY bno DESC";  // 게시물 번호(bno) 내림차순으로 정렬
+
+            // PreparedStatement 객체 생성하여 SQL 쿼리 실행 준비
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            // 쿼리 실행 결과로 ResultSet 객체 받기
+            ResultSet rs = pstmt.executeQuery();
+
+            // ResultSet에서 각 행을 순차적으로 읽어들여 출력
+            while (rs.next()) {
+                Board board = new Board();  // Board 객체 생성
+                board.setBno(rs.getInt("bno"));  // bno 컬럼 값 설정
+                board.setBtitle(rs.getString("btitle"));  // btitle 컬럼 값 설정
+                board.setBwriter(rs.getString("bwriter"));  // bwriter 컬럼 값 설정
+                board.setBdate(rs.getDate("bdate"));  // bdate 컬럼 값 설정
+
+                // 게시물 정보를 포맷에 맞게 출력
+                System.out.printf("%-6s%-12s%-16s%-40s \n",
+                        board.getBno(),  // 게시물 번호
+                        board.getBwriter(),  // 작성자
+                        board.getBdate(),  // 작성일
+                        board.getBtitle());  // 게시물 제목
+            }
+
+            // 쿼리 실행 후, ResultSet과 PreparedStatement 닫기 (자원 해제)
+            rs.close();
+            pstmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();  // SQL 예외가 발생하면 예외 정보 출력
+            exit();  // 예외 발생 시 프로그램 종료
+        }
+
+        // 메인 메뉴 출력
+        mainMenu();
+    }
+
+    // 메인 메뉴를 출력하고 사용자의 선택을 받아 처리하는 메소드
+    public void mainMenu() {
+        System.out.println();
+        System.out.println("--------------------------------------------");
+        // 메인 메뉴 출력: 사용자가 선택할 수 있는 옵션을 표시
+        System.out.println("메인 메뉴: 1. Create | 2. Read | 3. Clear | 4. Exit");
+        System.out.println("메뉴 선택: ");
+
+        String menuNo = scanner.nextLine();  // 사용자가 입력한 메뉴 번호를 읽어옴
+        System.out.println();
+
+        // 사용자 선택에 따른 메소드 호출
+        switch (menuNo) {
+            case "1" -> create();  // '1'을 선택하면 create() 메소드 실행 (게시물 작성)
+            case "2" -> read();  // '2'를 선택하면 read() 메소드 실행 (게시물 조회)
+            case "3" -> clear();  // '3'을 선택하면 clear() 메소드 실행 (게시물 삭제)
+            case "4" -> exit();  // '4'를 선택하면 exit() 메소드 실행 (프로그램 종료)
+        }
+    }
+
+    // 게시물 작성 메소드 (현재는 구체적인 기능을 구현하지 않음)
+    public void create() {
+        System.out.println("*** create() 메소드 실행됨");
+        // 게시물 목록을 출력하기 위해 list() 메소드 호출
+        list();
+    }
+
+    // 게시물 조회 메소드 (현재는 구체적인 기능을 구현하지 않음)
+    public void read() {
+        System.out.println("*** read() 메소드 실행됨");
+        // 게시물 목록을 출력하기 위해 list() 메소드 호출
+        list();
+    }
+
+    // 게시물 삭제 메소드 (현재는 구체적인 기능을 구현하지 않음)
+    public void clear() {
+        System.out.println("*** clear() 메소드 실행됨");
+        // 게시물 목록을 출력하기 위해 list() 메소드 호출
+        list();
+    }
+
+    // 프로그램 종료 메소드
+    public void exit() {
+        System.exit(0);  // 프로그램을 종료 (0은 정상 종료 코드)
+    }
+
+    // main 메소드: 프로그램의 시작점
+    public static void main(String[] args) {
+        // BoardExample3 객체 생성하여 프로그램 시작
+        BoardExample3 boardExample = new BoardExample3();
+        // 게시물 목록을 출력하는 list() 메소드 호출
+        boardExample.list();
+    }
+}
+
